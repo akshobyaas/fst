@@ -10,17 +10,24 @@
 <style>
 .auth-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg-primary); padding:24px; }
 .auth-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:40px 36px; width:100%; max-width:420px; box-shadow:var(--shadow-card); }
-.auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:28px; }
-.auth-logo-icon { width:40px; height:40px; background:var(--accent); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; }
+.auth-logo { display:flex; justify-content:center; margin-bottom:28px; }
+.auth-logo img { width:180px; height:auto; display:block; }
 </style>
 </head>
 <body>
 <div class="auth-wrap">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f1117" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h12"/><path d="M4 9h10"/><path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5"/></svg></div>
-      <div><div style="font-size:16px;font-weight:600;color:var(--text-primary)">PitLog</div><div style="font-size:11px;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase">Log it. Own it.</div></div>
+      <img id="auth-logo-img"
+           src="{% static 'trk/images/pitlog-logo-dark@1x.png' %}"
+           alt="PitLog — Fuel &amp; Service Tracking"
+           width="180" height="120" />
     </div>
+    <script>(function(){
+      var t=localStorage.getItem('pitlog-theme')||'dark';
+      var el=document.getElementById('auth-logo-img');
+      if(el && t==='light') el.src='{% static "trk/images/pitlog-logo-light@1x.png" %}';
+    })();</script>
     <div style="font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">Welcome back</div>
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:28px;">Sign in to your account</div>
     {% if form.non_field_errors %}<div class="alert alert-danger" style="margin-bottom:16px;">{{ form.non_field_errors.0 }}</div>{% endif %}

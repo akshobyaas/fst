@@ -54,31 +54,16 @@
     <div class="sidebar-inner">
       <!-- Logo -->
       <div class="logo-wrap" aria-hidden="true">
-        <div class="logo-icon" style="background:transparent;padding:0;display:flex;align-items:center;justify-content:center;">
-          <!-- PitLog icon: logbook + P road mark -->
-          <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="64" height="64" rx="14" fill="#111111"/>
-            <rect x="6" y="10" width="24" height="30" rx="3" fill="none" stroke="#ffffff" stroke-width="2"/>
-            <line x1="18" y1="10" x2="18" y2="40" stroke="#ffffff" stroke-width="1.5"/>
-            <polygon points="17,40 21,46 25,40" fill="#ffffff"/>
-            <rect x="8" y="15" width="5" height="7" rx="1" fill="none" stroke="#ffffff" stroke-width="1.2"/>
-            <line x1="10" y1="15" x2="10" y2="12" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="10" y1="12" x2="13" y2="12" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
-            <line x1="21" y1="17" x2="27" y2="17" stroke="#ffffff" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
-            <line x1="21" y1="21" x2="27" y2="21" stroke="#ffffff" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
-            <line x1="21" y1="25" x2="25" y2="25" stroke="#ffffff" stroke-width="1" opacity="0.5" stroke-linecap="round"/>
-            <path d="M34 10 L34 44" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-            <path d="M34 10 Q50 10 50 22 Q50 34 34 34" stroke="#ffffff" stroke-width="5" stroke-linecap="round" fill="none"/>
-            <path d="M34 10 L34 44" stroke="#111" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
-            <path d="M34 10 Q50 10 50 22 Q50 34 34 34" stroke="#111" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" fill="none"/>
-            <line x1="32" y1="50" x2="58" y2="50" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
-            <line x1="32" y1="50" x2="58" y2="50" stroke="#111" stroke-width="1.2" stroke-dasharray="6 5"/>
-          </svg>
-        </div>
-        <div>
-          <div class="logo-text">PitLog</div>
-          <div class="logo-sub">Log it. Own it.</div>
-        </div>
+        <a href="{% url 'home' %}" style="display:block;line-height:0;">
+          <img
+            id="sidebar-logo"
+            src="{% static 'trk/images/pitlog-logo-dark@1x.png' %}"
+            alt="PitLog — Fuel &amp; Service Tracking"
+            width="160"
+            height="107"
+            style="width:160px;height:auto;display:block;"
+          />
+        </a>
       </div>
 
       {% if user.is_authenticated %}
@@ -363,6 +348,13 @@ function applyTheme(t) {
   if (window.Chart) {
     Chart.defaults.color       = dark ? '#94a3b8' : '#4b5563';
     Chart.defaults.borderColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  }
+  /* Swap logo for current theme */
+  var logo = document.getElementById('sidebar-logo');
+  if (logo) {
+    logo.src = dark
+      ? '{% static "trk/images/pitlog-logo-dark@1x.png" %}'
+      : '{% static "trk/images/pitlog-logo-light@1x.png" %}';
   }
 }
 function toggleTheme() {

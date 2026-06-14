@@ -10,11 +10,24 @@
 <style>
 .auth-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--bg-primary); padding:24px; }
 .auth-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:40px 36px; width:100%; max-width:440px; box-shadow:var(--shadow-card); }
+.auth-logo { display:flex; justify-content:center; margin-bottom:28px; }
+.auth-logo img { width:180px; height:auto; display:block; }
 </style>
 </head>
 <body>
 <div class="auth-wrap">
   <div class="auth-card">
+    <div class="auth-logo">
+      <img id="auth-logo-img"
+           src="{% static 'trk/images/pitlog-logo-dark@1x.png' %}"
+           alt="PitLog — Fuel &amp; Service Tracking"
+           width="180" height="120" />
+    </div>
+    <script>(function(){
+      var t=localStorage.getItem('pitlog-theme')||'dark';
+      var el=document.getElementById('auth-logo-img');
+      if(el && t==='light') el.src='{% static "trk/images/pitlog-logo-light@1x.png" %}';
+    })();</script>
     <div style="font-size:22px;font-weight:600;color:var(--text-primary);margin-bottom:6px;">Create account</div>
     <div style="font-size:13px;color:var(--text-muted);margin-bottom:28px;">Start tracking fuel and service records</div>
     <form method="POST" novalidate>
