@@ -116,3 +116,76 @@ class DocumentForm(forms.ModelForm):
             if f.size > MAX_FILE_MB * 1024 * 1024:
                 raise ValidationError(f'File must be smaller than {MAX_FILE_MB} MB.')
         return f
+
+
+# ─── Phase 6: Profile forms ───────────────────────────────────────────────────
+
+from .models import UserProfile, Feedback
+from django.contrib.auth.forms import PasswordChangeForm  # re-export convenience
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model  = UserProfile
+        fields = ['display_name', 'bio', 'dob', 'avatar',
+                  'unit_distance', 'unit_volume', 'theme_preference',
+                  'notify_service', 'notify_docs', 'notify_fuel']
+        widgets = {
+            'display_name':     forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'How should we call you?', 'maxlength': 100}),
+            'bio':              forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'A short bio (optional)', 'maxlength': 300}),
+            'dob':              forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'avatar':           forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/jpeg,image/png,image/webp'}),
+            'unit_distance':    forms.Select(attrs={'class': 'form-select'}),
+            'unit_volume':      forms.Select(attrs={'class': 'form-select'}),
+            'theme_preference': forms.Select(attrs={'class': 'form-select'}),
+            'notify_service':   forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_docs':      forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'notify_fuel':      forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def clean_avatar(self):
+        f = self.cleaned_data.get('avatar')
+        if f and hasattr(f, 'name'):
+            ext = f.name.rsplit('.', 1)[-1].lower()
+            if ext not in {'jpg', 'jpeg', 'png', 'webp'}:
+                raise forms.ValidationError('Only JPG, PNG, or WebP images are allowed.')
+            if f.size > 3 * 1024 * 1024:
+                raise forms.ValidationError('Avatar must be smaller than 3 MB.')
+        return f
+
+    def clean_dob(self):
+        dob = self.cleaned_data.get('dob')
+        if dob and dob >= date.today():
+            raise forms.ValidationError('Date of birth must be in the past.')
+        return dob
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model  = Feedback
+        fields = ['category', 'message']
+        widgets = {
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'message':  forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Tell us what you think, report a bug, or suggest a feature…', 'maxlength': 2000}),
+        }
+    def clean_message(self):
+        msg = self.cleaned_data.get('message', '').strip()
+        if len(msg) < 10:
+            raise forms.ValidationError('Please write at least 10 characters.')
+        return msg
+
+
+class AccountEmailForm(forms.ModelForm):
+    """Change the email on the underlying User object."""
+    class Meta:
+        model  = User
+        fields = ['email']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'you@example.com'}),
+        }
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        qs = User.objects.filter(email=email).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('This email is already used by another account.')
+        return email

@@ -78,3 +78,70 @@ class Document(models.Model):
         if days <= 30: return 'critical'
         if days <= 90: return 'warning'
         return 'ok'
+
+
+# ─────────────────────────────────────────
+# UserProfile  — Phase 6 Profile Customization
+# ─────────────────────────────────────────
+
+UNIT_DISTANCE_CHOICES = [
+    ('km', 'Kilometres (km)'),
+    ('mi', 'Miles (mi)'),
+]
+
+UNIT_VOLUME_CHOICES = [
+    ('L', 'Litres (L)'),
+    ('gal', 'Gallons (gal)'),
+]
+
+THEME_CHOICES = [
+    ('dark',  'Dark'),
+    ('light', 'Light'),
+    ('auto',  'Auto (system)'),
+]
+
+
+class UserProfile(models.Model):
+    user             = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    display_name     = models.CharField(max_length=100, blank=True, default='')
+    bio              = models.TextField(max_length=300, blank=True, default='')
+    dob              = models.DateField(null=True, blank=True)
+    avatar           = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    unit_distance    = models.CharField(max_length=5,  choices=UNIT_DISTANCE_CHOICES, default='km')
+    unit_volume      = models.CharField(max_length=5,  choices=UNIT_VOLUME_CHOICES,   default='L')
+    theme_preference = models.CharField(max_length=10, choices=THEME_CHOICES,          default='dark')
+    notify_service   = models.BooleanField(default=True,  help_text='Remind about upcoming service')
+    notify_docs      = models.BooleanField(default=True,  help_text='Remind about expiring documents')
+    notify_fuel      = models.BooleanField(default=False, help_text='Weekly fuel summary')
+    updated_at       = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'User Profile'
+
+    def __str__(self):
+        return f'Profile of {self.user.username}'
+
+    @property
+    def name_display(self):
+        return self.display_name or self.user.username
+
+
+class Feedback(models.Model):
+    user       = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    category   = models.CharField(max_length=50, choices=[
+        ('bug',        'Bug Report'),
+        ('feature',    'Feature Request'),
+        ('ui',         'UI / Design'),
+        ('general',    'General Feedback'),
+    ], default='general')
+    message    = models.TextField(max_length=2000)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    user_agent = models.CharField(max_length=300, blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Feedback'
+        verbose_name_plural = 'Feedback Submissions'
+        ordering = ['-submitted_at']
+
+    def __str__(self):
+        return f'{self.category} by {self.user} at {self.submitted_at:%Y-%m-%d}'

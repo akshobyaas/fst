@@ -497,23 +497,7 @@ def download_document(request, id):
     )
 
 
-# ─────────────────────────────────────────
-# Profile  — OPTIMISED (aggregates in one pass)
-# ─────────────────────────────────────────
-
-@login_required
-def profile(request):
-    user_vehicles  = _user_vehicles(request.user)
-    total_vehicles = user_vehicles.count()
-    total_fuel     = FuelEntry.objects.filter(vehicle__user=request.user).count()
-    total_services = ServiceRecord.objects.filter(vehicle__user=request.user).count()
-    total_docs     = Document.objects.filter(vehicle__user=request.user).count()
-    total_cost     = FuelEntry.objects.filter(vehicle__user=request.user).aggregate(t=Sum('cost'))['t'] or 0
-    return render(request, 'trk/profile.html', {
-        'total_vehicles': total_vehicles, 'total_fuel': total_fuel,
-        'total_services': total_services, 'total_docs': total_docs,
-        'total_cost': round(total_cost, 2),
-    })
+# profile view moved to Phase 6 section below
 
 
 # ─────────────────────────────────────────
@@ -675,3 +659,98 @@ def export_mileage(request):
             s['mileage'],
         ])
     return response
+
+
+# ─────────────────────────────────────────
+# Phase 6 — Profile Customization
+# ─────────────────────────────────────────
+
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
+from .models import UserProfile, Feedback
+from .forms import UserProfileForm, FeedbackForm, AccountEmailForm
+
+
+def _get_or_create_profile(user):
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    return profile
+
+
+@login_required
+def profile_edit(request):
+    """Edit personal info + avatar + units + theme + notifications in one form."""
+    profile = _get_or_create_profile(request.user)
+    email_form = AccountEmailForm(instance=request.user)
+
+    if request.method == 'POST':
+        form       = UserProfileForm(request.POST, request.FILES, instance=profile)
+        email_form = AccountEmailForm(request.POST, instance=request.user)
+        if form.is_valid() and email_form.is_valid():
+            email_form.save()
+            form.save()
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('profile')
+    else:
+        form = UserProfileForm(instance=profile)
+
+    return render(request, 'trk/profile_edit.html', {
+        'form': form,
+        'email_form': email_form,
+        'profile': profile,
+    })
+
+
+@login_required
+def profile_password(request):
+    """Change password."""
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # keep user logged in
+            messages.success(request, 'Password changed successfully.')
+            return redirect('profile')
+    else:
+        form = PasswordChangeForm(request.user)
+    # Apply form-control class to all fields
+    for field in form.fields.values():
+        field.widget.attrs.setdefault('class', 'form-control')
+    return render(request, 'trk/profile_password.html', {'form': form})
+
+
+@login_required
+def profile_feedback(request):
+    """Submit feedback to developer."""
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            fb = form.save(commit=False)
+            fb.user       = request.user
+            fb.user_agent = request.META.get('HTTP_USER_AGENT', '')[:300]
+            fb.save()
+            messages.success(request, 'Thank you for your feedback!')
+            return redirect('profile')
+    else:
+        form = FeedbackForm()
+    return render(request, 'trk/profile_feedback.html', {'form': form})
+
+
+# ── Updated main profile view (now includes profile data) ──
+
+@login_required
+def profile(request):
+    profile_obj    = _get_or_create_profile(request.user)
+    user_vehicles  = _user_vehicles(request.user)
+    total_vehicles = user_vehicles.count()
+    total_fuel     = FuelEntry.objects.filter(vehicle__user=request.user).count()
+    total_services = ServiceRecord.objects.filter(vehicle__user=request.user).count()
+    total_docs     = Document.objects.filter(vehicle__user=request.user).count()
+    total_cost     = FuelEntry.objects.filter(vehicle__user=request.user).aggregate(t=Sum('cost'))['t'] or 0
+    return render(request, 'trk/profile.html', {
+        'profile':         profile_obj,
+        'total_vehicles':  total_vehicles,
+        'total_fuel':      total_fuel,
+        'total_services':  total_services,
+        'total_docs':      total_docs,
+        'total_cost':      round(total_cost, 2),
+    })

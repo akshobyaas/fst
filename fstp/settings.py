@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
-    'trk',
+    'trk.apps.TrkConfig',
 ]
 
 MIDDLEWARE = [

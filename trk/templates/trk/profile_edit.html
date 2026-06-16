@@ -1,0 +1,163 @@
+{% extends 'trk/base.html' %}
+{% block title %}Edit Profile — PitLog{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Edit Profile</div>
+    <div class="page-subtitle">Personalise your PitLog experience</div>
+  </div>
+</div>
+
+{% if messages %}
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} mb-3" role="alert">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  {# ── Avatar ──────────────────────────────────────────── #}
+  <div class="form-card" style="margin-bottom:20px;">
+    <div class="card-section-label">Avatar</div>
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:16px;">
+      <div id="avatar-preview-wrap" style="width:72px;height:72px;border-radius:50%;border:2px solid var(--accent-border);overflow:hidden;flex-shrink:0;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;">
+        {% if profile.avatar %}
+          <img id="avatar-preview" src="{{ profile.avatar.url }}" alt="Current avatar" style="width:100%;height:100%;object-fit:cover;">
+        {% else %}
+          <span id="avatar-initial" style="font-size:26px;font-weight:700;color:var(--accent);">{{ user.username|first|upper }}</span>
+        {% endif %}
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <label class="form-label" for="{{ form.avatar.id_for_label }}">Profile photo</label>
+        {{ form.avatar }}
+        <div class="form-text">JPG, PNG or WebP · max 3 MB</div>
+        {% if form.avatar.errors %}<div class="field-error">{{ form.avatar.errors|join:", " }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Personal Info ────────────────────────────────────── #}
+  <div class="form-card" style="margin-bottom:20px;">
+    <div class="card-section-label">Personal info</div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.display_name.id_for_label }}">Display name</label>
+      {{ form.display_name }}
+      {% if form.display_name.errors %}<div class="field-error">{{ form.display_name.errors|join:", " }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ email_form.email.id_for_label }}">Email address</label>
+      {{ email_form.email }}
+      {% if email_form.email.errors %}<div class="field-error">{{ email_form.email.errors|join:", " }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.dob.id_for_label }}">Date of birth</label>
+      {{ form.dob }}
+      {% if form.dob.errors %}<div class="field-error">{{ form.dob.errors|join:", " }}</div>{% endif %}
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="{{ form.bio.id_for_label }}">Bio <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+      {{ form.bio }}
+      {% if form.bio.errors %}<div class="field-error">{{ form.bio.errors|join:", " }}</div>{% endif %}
+    </div>
+  </div>
+
+  {# ── Units ────────────────────────────────────────────── #}
+  <div class="form-card" style="margin-bottom:20px;">
+    <div class="card-section-label">Units &amp; measurement</div>
+    <div class="form-row-2">
+      <div class="form-group">
+        <label class="form-label" for="{{ form.unit_distance.id_for_label }}">Distance</label>
+        {{ form.unit_distance }}
+        {% if form.unit_distance.errors %}<div class="field-error">{{ form.unit_distance.errors|join:", " }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="{{ form.unit_volume.id_for_label }}">Fuel volume</label>
+        {{ form.unit_volume }}
+        {% if form.unit_volume.errors %}<div class="field-error">{{ form.unit_volume.errors|join:", " }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Theme ─────────────────────────────────────────────── #}
+  <div class="form-card" style="margin-bottom:20px;">
+    <div class="card-section-label">Appearance</div>
+    <div class="form-group">
+      <label class="form-label" for="{{ form.theme_preference.id_for_label }}">Theme preference</label>
+      {{ form.theme_preference }}
+      <div class="form-text">This will be applied the next time you load the app.</div>
+      {% if form.theme_preference.errors %}<div class="field-error">{{ form.theme_preference.errors|join:", " }}</div>{% endif %}
+    </div>
+  </div>
+
+  {# ── Notifications ─────────────────────────────────────── #}
+  <div class="form-card" style="margin-bottom:24px;">
+    <div class="card-section-label">Notifications &amp; reminders</div>
+    <div class="notify-list">
+
+      <label class="notify-row">
+        <div>
+          <div class="notify-label">Service reminders</div>
+          <div class="notify-sub">Alert when a vehicle is due for service</div>
+        </div>
+        {{ form.notify_service }}
+      </label>
+
+      <label class="notify-row">
+        <div>
+          <div class="notify-label">Document expiry alerts</div>
+          <div class="notify-sub">Warn when insurance, PUC, or RC is expiring soon</div>
+        </div>
+        {{ form.notify_docs }}
+      </label>
+
+      <label class="notify-row">
+        <div>
+          <div class="notify-label">Weekly fuel summary</div>
+          <div class="notify-sub">A digest of fuel spend &amp; mileage every Monday</div>
+        </div>
+        {{ form.notify_fuel }}
+      </label>
+
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button type="submit" class="btn btn-primary">Save changes</button>
+    <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<script>
+/* Live avatar preview */
+document.getElementById('{{ form.avatar.id_for_label }}').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const wrap = document.getElementById('avatar-preview-wrap');
+    wrap.innerHTML = '<img id="avatar-preview" src="' + ev.target.result + '" alt="Avatar preview" style="width:100%;height:100%;object-fit:cover;">';
+  };
+  reader.readAsDataURL(file);
+});
+
+/* Apply theme_preference immediately on change */
+document.getElementById('{{ form.theme_preference.id_for_label }}').addEventListener('change', function() {
+  const val = this.value;
+  if (val === 'auto') {
+    const prefer = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', prefer);
+    localStorage.setItem('pitlog-theme', prefer);
+  } else {
+    document.documentElement.setAttribute('data-theme', val);
+    localStorage.setItem('pitlog-theme', val);
+  }
+});
+</script>
+{% endblock %}

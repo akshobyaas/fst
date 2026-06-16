@@ -8,8 +8,11 @@ urlpatterns = [
     path('logout/',   views.logout_view,   name='logout'),
 
     # Dashboard & profile
-    path('',         views.home,    name='home'),
-    path('profile/', views.profile, name='profile'),
+    path('',                   views.home,             name='home'),
+    path('profile/',           views.profile,          name='profile'),
+    path('profile/edit/',      views.profile_edit,     name='profile_edit'),
+    path('profile/password/',  views.profile_password, name='profile_password'),
+    path('profile/feedback/',  views.profile_feedback, name='profile_feedback'),
 
     # Vehicles
     path('vehicles/',                views.vehicles,       name='vehicles'),
