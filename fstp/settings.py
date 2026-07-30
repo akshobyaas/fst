@@ -15,7 +15,7 @@ DEBUG      = os.environ.get('DEBUG', 'False') == 'True'
 
 # ── Hosts & CSRF ──
 ALLOWED_HOSTS = [
-    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',') if h.strip()
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app,*').split(',') if h.strip()
 ]
 
 # Ensure Vercel HTTPS domains are trusted for POST/CSRF requests
@@ -49,7 +49,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'fstp.urls'
 
 TEMPLATES = [{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'BACKEND': 'django.template.backends.DjangoTemplates',
     'DIRS': [],
     'APP_DIRS': True,
     'OPTIONS': {'context_processors': [
@@ -92,9 +92,12 @@ USE_I18N      = True
 USE_TZ        = True
 
 # ── Static files ──
-STATIC_URL       = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT      = BASE_DIR / 'staticfiles'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+_static_dir = BASE_DIR / 'static'
+if _static_dir.is_dir():
+    STATICFILES_DIRS = [_static_dir]
 
 # ── Auth ──
 LOGIN_URL           = '/login/'
@@ -117,7 +120,7 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER   = True
     SECURE_CONTENT_TYPE_NOSNIFF  = True
 
-# ── Storage (Backblaze B2 / FileSystem) ──
+# ── Storage (Backblaze B2 / FileSystem + Vercel WhiteNoise) ──
 if os.environ.get('USE_S3') == 'True':
     AWS_ACCESS_KEY_ID        = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY    = os.environ.get('AWS_SECRET_ACCESS_KEY')
@@ -133,7 +136,7 @@ if os.environ.get('USE_S3') == 'True':
             'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage',
         },
         'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
         },
     }
     MEDIA_URL = f"{os.environ.get('AWS_S3_ENDPOINT_URL')}/{os.environ.get('AWS_STORAGE_BUCKET_NAME')}/"
@@ -144,7 +147,7 @@ else:
             'BACKEND': 'django.core.files.storage.FileSystemStorage',
         },
         'staticfiles': {
-            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+            'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
         },
     }
     MEDIA_URL  = '/media/'
