@@ -10,12 +10,18 @@ except ImportError:
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY    = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
-DEBUG         = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
+DEBUG      = os.environ.get('DEBUG', 'False') == 'True'
 
+# ── Hosts & CSRF ──
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',') if h.strip()
+]
+
+# Ensure Vercel HTTPS domains are trusted for POST/CSRF requests
+DEFAULT_CSRF_ORIGINS = 'https://*.vercel.app,http://localhost:8000,http://127.0.0.1:8000'
 CSRF_TRUSTED_ORIGINS = [
-    h for h in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if h
+    h.strip() for h in os.environ.get('CSRF_TRUSTED_ORIGINS', DEFAULT_CSRF_ORIGINS).split(',') if h.strip()
 ]
 
 INSTALLED_APPS = [
@@ -98,16 +104,20 @@ LOGOUT_REDIRECT_URL = '/login/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MESSAGE_STORAGE    = 'django.contrib.messages.storage.session.SessionStorage'
 
-# ── Security (production only) ──
+# ── Security (Vercel compatible) ──
 if not DEBUG:
+    # Essential for Vercel behind HTTPS proxies
     SECURE_PROXY_SSL_HEADER     = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT          = True
-    SESSION_COOKIE_SECURE        = True
-    CSRF_COOKIE_SECURE           = True
+    
+    # Disable redirect on Vercel to prevent infinite 301 loops
+    SECURE_SSL_REDIRECT         = False  
+    
+    SESSION_COOKIE_SECURE       = True
+    CSRF_COOKIE_SECURE          = True
     SECURE_BROWSER_XSS_FILTER   = True
     SECURE_CONTENT_TYPE_NOSNIFF  = True
 
-# ── Backblaze B2 Storage ──
+# ── Storage (Backblaze B2 / FileSystem) ──
 if os.environ.get('USE_S3') == 'True':
     AWS_ACCESS_KEY_ID        = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY    = os.environ.get('AWS_SECRET_ACCESS_KEY')
