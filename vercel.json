@@ -1,16 +1,17 @@
 ﻿{
+  "version": 2,
   "buildCommand": "bash build_files.sh",
-  "builds": [
-    {
-      "src": "fstp/wsgi.py",
-      "use": "@vercel/python",
-      "config": { "maxLambdaSize": "15mb" }
+  "outputDirectory": "staticfiles",
+  "framework": null,
+  "functions": {
+    "fstp/wsgi.py": {
+      "runtime": "vercel-python@4.x"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "dest": "/static/`$1"
     },
     {
       "src": "/(.*)",
