@@ -3,11 +3,6 @@
   "buildCommand": "bash build_files.sh",
   "outputDirectory": "staticfiles",
   "framework": null,
-  "functions": {
-    "fstp/wsgi.py": {
-      "runtime": "vercel-python@4.x"
-    }
-  },
   "routes": [
     {
       "src": "/static/(.*)",
