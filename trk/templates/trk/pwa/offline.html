@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline — PitLog</title>
+<link rel="stylesheet" href="{% static 'trk/css/style.css' %}">
+<script>(function(){ document.documentElement.setAttribute('data-theme', localStorage.getItem('pitlog-theme') || 'dark'); })();</script>
+<style>
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg-primary); padding:24px; }
+  .err-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-xl); padding:48px 40px; max-width:480px; width:100%; text-align:center; box-shadow:var(--shadow-card); }
+  .err-icon { color:var(--accent); margin-bottom:20px; }
+  .err-title { font-size:20px; font-weight:600; color:var(--text-primary); margin-bottom:10px; }
+  .err-msg { font-size:14px; color:var(--text-muted); margin-bottom:28px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="err-card">
+  <div class="err-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+      <line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>
+  </div>
+  <div class="err-title">You're offline</div>
+  <p class="err-msg">No internet connection detected. Connect to the internet and try again — your data is safe and will sync when you're back online.</p>
+  <button onclick="window.location.reload()" class="btn btn-primary">Try again</button>
+</div>
+</body>
+</html>
