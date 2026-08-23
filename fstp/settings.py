@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-in-production')
 DEBUG      = os.environ.get('DEBUG', 'False') == 'True'
 
-# ── Hosts & CSRF ──
+# -- Hosts & CSRF --
 ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app,*').split(',') if h.strip()
 ]
@@ -49,7 +49,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'fstp.urls'
 
 TEMPLATES = [{
-    'BACKEND': 'django.template.backends.DjangoTemplates',
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
     'DIRS': [],
     'APP_DIRS': True,
     'OPTIONS': {'context_processors': [
@@ -61,7 +61,7 @@ TEMPLATES = [{
 
 WSGI_APPLICATION = 'fstp.wsgi.application'
 
-# ── Database ──
+# -- Database --
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
@@ -91,7 +91,7 @@ TIME_ZONE     = 'Asia/Kolkata'
 USE_I18N      = True
 USE_TZ        = True
 
-# ── Static files ──
+# -- Static files --
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
@@ -99,7 +99,7 @@ _static_dir = BASE_DIR / 'static'
 if _static_dir.is_dir():
     STATICFILES_DIRS = [_static_dir]
 
-# ── Auth ──
+# -- Auth --
 LOGIN_URL           = '/login/'
 LOGIN_REDIRECT_URL  = '/'
 LOGOUT_REDIRECT_URL = '/login/'
@@ -107,7 +107,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MESSAGE_STORAGE    = 'django.contrib.messages.storage.session.SessionStorage'
 
-# ── Security (Vercel compatible) ──
+# -- Security (Vercel compatible) --
 if not DEBUG:
     # Essential for Vercel behind HTTPS proxies
     SECURE_PROXY_SSL_HEADER     = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -120,7 +120,7 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER   = True
     SECURE_CONTENT_TYPE_NOSNIFF  = True
 
-# ── Storage (Backblaze B2 / FileSystem + Vercel WhiteNoise) ──
+# -- Storage (Backblaze B2 / FileSystem + Vercel WhiteNoise) --
 if os.environ.get('USE_S3') == 'True':
     AWS_ACCESS_KEY_ID        = os.environ.get('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY    = os.environ.get('AWS_SECRET_ACCESS_KEY')
